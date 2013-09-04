@@ -16,6 +16,7 @@ type Customer struct {
 	Balance      int64         `json:"account_balance"`
 	Delinquent   bool          `json:"delinquent"`
 	Card         *Card         `json:"active_card,omitempty"`
+	DefaultCard  String        `json:"default_card,omitempty"`
 	Discount     *Discount     `json:"discount,omitempty"`
 	Subscription *Subscription `json:"subscription,omitempty"`
 	Livemode     bool          `json:"livemode"`
@@ -46,6 +47,9 @@ type CustomerParams struct {
 
 	// (Optional) Customer's Active Credid Card, using a Card Token
 	Token string
+
+	// (Optional) ID of card to make the customer’s new default for invoice payments
+	DefaultCard string
 
 	// (Optional) If you provide a coupon code, the customer will have a
 	// discount applied on all recurring charges.
@@ -159,6 +163,9 @@ func appendCustomerParamsToValues(c *CustomerParams, values *url.Values) {
 	}
 	if c.TrialEnd != 0 {
 		values.Add("trial_end", strconv.FormatInt(c.TrialEnd, 10))
+	}
+	if c.DefaultCard != "" {
+		values.Add("default_card", c.DefaultCard)
 	}
 
 	// add optional credit card details, if specified
