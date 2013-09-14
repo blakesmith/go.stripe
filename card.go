@@ -1,9 +1,15 @@
 package stripe
 
 import (
+	"net/url"
 	"strconv"
 	"strings"
 )
+
+// CreditCardClient encapsulates operations for creating, updating, deleting
+// credit cards
+
+type CardClient struct{}
 
 // Credit Card Types accepted by the Stripe API.
 const (
@@ -67,6 +73,22 @@ type CardParams struct {
 
 	// (Optional) Billing address zip code
 	AddressZip string
+}
+
+func (self *CardClient) Create(customerId string, token string, params ...*CardParams) (*Card, error) {
+	values := url.Values{}
+
+	// attach a new card, if requested
+	if len(token) != 0 {
+		values.Add("card", token)
+	} else if len(params) > 0 && params[0] != nil {
+		appendCardParamsToValues(params[0], &values)
+	}
+
+	card := Card{}
+	path := "/v1/customers/" + url.QueryEscape(customerId) + "/cards"
+	err := query("POST", path, values, &card)
+	return &card, err
 }
 
 // IsLuhnValid uses the Luhn Algorithm (also known as the Mod 10 algorithm) to
